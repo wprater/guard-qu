@@ -5,20 +5,14 @@ require 'timeout'
 module Guard
   class Qu < Guard
 
-    DEFAULT_SIGNAL = :QUIT
-    DEFAULT_QUEUE = '*'.freeze
-    DEFAULT_COUNT = 1
-    DEFAULT_TASK_SINGLE = 'qu:work'.freeze
-    DEFAULT_TASK_MULTIPLE = 'qu:workers'.freeze
+    DEFAULT_SIGNAL = :TERM
+    DEFAULT_QUEUE = 'default'.freeze
+    DEFAULT_TASK = 'qu:work'.freeze
 
     # Allowable options are:
     #  - :environment  e.g. 'test'
     #  - :task .e.g 'qu:work'
-    #  - :queue e.g. '*'
-    #  - :count e.g. 3
-    #  - :interval e.g. 5
-    #  - :verbose e.g. true
-    #  - :vverbose e.g. true
+    #  - :queue e.g. 'failed'
     #  - :trace e.g. true
     #  - :stop_signal e.g. :QUIT or :SIGQUIT
     def initialize(watchers = [], options = {})
@@ -26,8 +20,7 @@ module Guard
       @pid = nil
       @stop_signal = options[:stop_signal] || DEFAULT_SIGNAL
       @options[:queue] ||= DEFAULT_QUEUE
-      @options[:count] ||= DEFAULT_COUNT
-      @options[:task] ||= (@options[:count].to_i == 1) ? DEFAULT_TASK_SINGLE : DEFAULT_TASK_MULTIPLE
+      @options[:task] ||= DEFAULT_TASK
       super
     end
 
@@ -96,13 +89,8 @@ module Guard
     def env
       var = Hash.new
 
-      var['INTERVAL']  = @options[:interval].to_s    if @options[:interval]
       var['QUEUE']     = @options[:queue].to_s       if @options[:queue]
-      var['COUNT']     = @options[:count].to_s       if @options[:count]
       var['RACK_ENV']  = @options[:environment].to_s if @options[:environment]
-
-      var['VERBOSE']  = '1' if @options[:verbose]
-      var['VVERBOSE'] = '1' if @options[:vverbose]
 
       return var
     end
